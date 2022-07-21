@@ -2,18 +2,12 @@
 id: search-attributes
 title: Default and Custom Search Attributes in TypeScript Workflows
 sidebar_label: Search Attributes
-description: Search Attributes enable eventually-consistent, business-logic-focused search and filter queries for Workflow Executions. Most Search APIs are not yet available in the TypeScript SDK beta.
+description: Search Attributes enable eventually-consistent, business-logic-focused search and filter queries for Workflow Executions.
 ---
 
 <!-- prettier-ignore -->
 import * as WhatsSearchAttr from '../concepts/what-is-a-search-attribute.md'
 import * as WhatIsATemporalCronJob from '../concepts/what-is-a-temporal-cron-job.md'
-
-:::caution This is an experimental API
-
-Most Search APIs are not yet available in the TypeScript SDK beta.
-
-:::
 
 ## Overview
 
