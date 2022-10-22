@@ -1,9 +1,13 @@
 ---
 id: configuration
 title: Temporal Cluster configuration reference
+description: Much of the behavior of a Temporal Cluster is configured using the `development.yaml` file.
 sidebar_label: Cluster configuration
-toc_max_heading_level: 5
+tags:
+  - reference
 ---
+
+<!-- This file is generated. Do not edit it directly. -->
 
 Much of the behavior of a Temporal Cluster is configured using the `development.yaml` file and may contain the following top-level sections:
 
@@ -90,8 +94,9 @@ The `statsd` sections supports the following settings:
 The `prometheus` sections supports the following settings:
 
 - `framework`: The framework to use, currently supports `opentelemetry` and `tally`, default is `tally`. We plan to switch default to `opentelemetry` once its API become stable.
-- `listenAddress`: Address for prometheus to scrape metrics from.
-- `handlerPath`: Metrics handler path for scraper, default is `/metrics`.
+- `listenAddress`: Address for Prometheus to scrape metrics from.
+  The Temporal Server uses the Prometheus client API, and the `listenAddress` configuration is used to listen for metrics.
+- `handlerPath`: Metrics handler path for scraper; default is `/metrics`.
 
 #### m3
 
@@ -109,7 +114,7 @@ The `m3` sections supports the following settings:
 ### tls
 
 The `tls` section controls the SSL/TLS settings for network communication and contains two subsections, `internode` and `frontend`.
-The `internode` section governs internal service communication among roles where the `frontend` governs SDK client communication to the frontend service role.
+The `internode` section governs internal service communication among roles where the `frontend` governs SDK client communication to the Frontend Service role.
 
 Each of these subsections contain a `server` section and a `client` section.
 The `server` contains the following parameters:
@@ -142,7 +147,7 @@ Note, the `client` section generally needs to be provided to specify an expected
 You can avoid specifying this if your server certificates contain the appropriate IP Subject Alternative Names.
 
 Additionally, the `rootCaFiles` field needs to be provided when the client's host does not trust the Root CA used by the server.
-The example below extends the above example to manually specify the Root CA used by the frontend services:
+The example below extends the above example to manually specify the Root CA used by the Frontend Services:
 
 ```yaml
 global:
@@ -279,7 +284,7 @@ A `sql` data store definition can contain the following values:
 
 #### tls
 
-The `tls` sections may contain:
+The `tls` and `mtls` sections can contain the following values:
 
 - `enabled` - _boolean_.
 - `serverName` - name of the server hosting the data store.
@@ -301,7 +306,7 @@ The `log` section is optional and contains the following possible values:
 
 ## clusterMetadata
 
-`clusterMetadata` contains the local cluster information. The information is used in [Multi-Cluster Replication](/concepts/what-is-multi-cluster-replication).
+`clusterMetadata` contains the local cluster information. The information is used in [Multi-Cluster Replication](/clusters#multi-cluster-replication).
 
 An example `clusterMetadata` section:
 

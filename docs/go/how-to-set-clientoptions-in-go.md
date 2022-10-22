@@ -21,21 +21,21 @@ Create an instance of [`Options`](https://pkg.go.dev/go.temporal.io/sdk/client#O
 | [`ContextPropagators`](#contextpropagators) | No       | [`[]ContextPropagator`](https://pkg.go.dev/go.temporal.io/sdk/internal#ContextPropagator)  |
 | [`ConnectionOptions`](#connectionoptions)   | No       | [`ConnectionOptions`](https://pkg.go.dev/go.temporal.io/sdk/internal#ConnectionOptions)    |
 | [`HeadersProvider`](#headersprovider)       | No       | [`HeadersProvider`](https://pkg.go.dev/go.temporal.io/sdk/internal#HeadersProvider)        |
-| [TrafficController](#trafficcontroller)     | No       | [`TrafficController`](https://pkg.go.dev/go.temporal.io/sdk/internal#TrafficController)    |
-| [Interceptors](#interceptors)               | No       | [`[]ClientInterceptor`](https://pkg.go.dev/go.temporal.io/sdk/internal#ClientInterceptor)  |
+| [`TrafficController`](#trafficcontroller)   | No       | [`TrafficController`](https://pkg.go.dev/go.temporal.io/sdk/internal#TrafficController)    |
+| [`Interceptors`](#interceptors)             | No       | [`[]ClientInterceptor`](https://pkg.go.dev/go.temporal.io/sdk/internal#ClientInterceptor)  |
 
 ### `HostPort`
 
 **How to set the Temporal Client's host:port connection in Go**
 
 - Type: `string`
-- Default: [`client.DefaultHostPort`](https://pkg.go.dev/go.temporal.io/sdk/client#pkg-constants) (localhost:7233)
+- Default: [`client.DefaultHostPort`](https://pkg.go.dev/go.temporal.io/sdk/client#pkg-constants) (127.0.0.1:7233)
 
 ```go
 clientOptions := client.Options{
   HostPort: client.DefaultHostPort,
 }
-temporalClient, err := client.NewClient(clientOptions)
+temporalClient, err := client.Dial(clientOptions)
 ```
 
 The `HostPort` value is a gRPC address and therefore can also support a special-formatted address of `<resolver>:///<value>` that will use a registered resolver.
@@ -51,7 +51,7 @@ For example, to manually provide multiple IPs to round-robin across, a `google.g
 builder := manual.NewBuilderWithScheme("myresolver")
 builder.InitialState(resolver.State{Addresses: []resolver.Address{{Addr: "1.2.3.4:1234"},{Addr: "2.3.4.5:2345"}}})
 resolver.Register(builder)
-temporalClient, err := client.NewClient(client.Options{HostPort: "myresolver:///ignoredvalue"})
+temporalClient, err := client.Dial(client.Options{HostPort: "myresolver:///ignoredvalue"})
 ```
 
 Other more advanced resolvers can also be registered.
@@ -89,7 +89,7 @@ func main() {
   clientOptions := client.Options{
     Logger: logger,
   }
-  temporalClient, err := client.NewClient(clientOptions)
+  temporalClient, err := client.Dial(clientOptions)
   // ...
 }
 ```
@@ -135,4 +135,10 @@ Set to induce artificial failures in test scenarios
 
 - Type: `TrafficController`
 
-### Interceptors
+### `Interceptors`
+
+gRPC interceptors that are applied to every RPC call performed by this connection.
+By default, an interceptor is included; it automatically retries retryable errors.
+If you do not want to perform automatic retries, set this to an empty list (or a list with your own interceptors).
+
+- Type: `[]ClientInterceptor`

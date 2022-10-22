@@ -1,6 +1,6 @@
 ---
 id: worker-performance
-title: Application development Worker performance
+title: Developer's Guide - Worker performance
 description: Guide into Workers Tuning
 sidebar_label: Worker performance
 tags:
@@ -9,8 +9,6 @@ tags:
 ---
 
 import RelatedReadList from '../components/RelatedReadList.js'
-
-# Temporal Workers Tuning
 
 _Note: All metrics in this article are prepended with the “temporal\_” prefix. The prefix is omitted in this article to make the names more descriptive._
 
@@ -128,5 +126,5 @@ As with any multithreading system, specifying too large values without monitorin
 
 **Related**
 
-- [Workers in production operation guide](/blog/workers-in-production)
-- [Full set of SDK Metrics reference](/references/metrics.md)
+- [Workers in production operation guide](https://temporal.io/blog/workers-in-production)
+- [Full set of SDK Metrics reference](/references/sdk-metrics)

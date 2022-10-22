@@ -6,11 +6,19 @@ tags:
   - php
 ---
 
+:::info Try the Developer's guide
+
+The majority of this information has moved into the [Developer's guide](/application-development/?lang=php).
+
+However, if you can't find what you are looking for there, we recommend checking this doc set as well.
+
+:::
+
 If a Workflow execution has been stuck at a state for longer than an expected period of time, you
 might want to query the current call stack. You can use the Temporal CLI to perform this query. For
 example:
 
-`tctl --namespace samples-namespace workflow query -w my_workflow_id -r my_run_id -qt __stack_trace`
+`tctl --namespace samples-namespace workflow query -w your_workflow_id -r your_run_id -qt __stack_trace`
 
 > You can also access the stack trace from Temporal Web UI.
 
@@ -21,7 +29,7 @@ up a query handler using method attribute `QueryMethod` or `Workflow::registerQu
 
 ```php
 #[Workflow\WorkflowInterface]
-class MyWorkflow
+class YourWorkflow
 {
     #[Workflow\QueryMethod]
     public function getValue()
@@ -44,7 +52,7 @@ serializable. The following sample code sets up a query handler that handles the
 
 ```php
 #[Workflow\WorkflowInterface]
-class MyWorkflow
+class YourWorkflow
 {
     private string $currentState;
 
@@ -67,14 +75,14 @@ class MyWorkflow
             throw $e;
         }
 
-        $myActivity = Workflow::newActivityStub(
-            MyActivityInterface::class,
+        $yourActivity = Workflow::newActivityStub(
+            YourActivityInterface::class,
             ActivityOptions::new()->withScheduleToStartTimeout(60)
         );
 
         $this->currentState = 'waiting activity';
         try{
-            yield $myActivity->doSomething('some input');
+            yield $YourActivity->doSomething('some input');
         } catch (\Throwable $e) {
             $this->currentState = 'activity failed';
             throw $e;
@@ -89,7 +97,7 @@ class MyWorkflow
 
 You can now query `current_state` by using the CLI:
 
-`tctl --namespace samples-namespace workflow query -w my_workflow_id -r my_run_id -qt current_state`
+`tctl --namespace samples-namespace workflow query -w your_workflow_id -r your_run_id -qt current_state`
 
 You can also issue a query from code using the `QueryWorkflow()` API on a Temporal client object.
 
@@ -97,7 +105,7 @@ Use WorkflowStub to query workflow instances from your client code (can be appli
 
 ```php
 $workflow = $workflowClient->newWorkflowStub(
-    MyWorkflow::class,
+    YourWorkflow::class,
     WorkflowOptions::new()
 );
 

@@ -4,59 +4,11 @@ title: Temporal Server self-hosted production deployment
 sidebar_label: Production deployment
 ---
 
-## Overview
+:::note
 
-While a lot of effort has been made to easily run and test the Temporal Server in a development environment (see the [Quick install guide](/clusters/quick-install)), there is far less of an established framework for deploying Temporal to a live (production) environment.
-That is because the set up of the Server depends very much on your intended use-case and the hosting infrastructure.
-
-This page is dedicated to providing a "first principles" approach to self-hosting the Temporal Server.
-As a reminder, experts are accessible via the [Community forum](https://community.temporal.io/) and [Slack](https://temporal.io/slack) should you have any questions.
-
-:::info
-
-If you are interested in a fully managed service hosting Temporal Server, please [register your interest in Temporal Cloud](https://temporal.io/cloud). We have a waitlist for early Design Partners.
+The information in this page is being dispersed into [Knowledge base articles](/kb), [Cluster concept guide](/clusters), and the [Cluster deployment guide](/cluster-deployment-guide).
 
 :::
-
-## Temporal Server
-
-Temporal Server is a Go application which you can [import](/server/options) or run as a binary (we offer [builds with every release](https://github.com/temporalio/temporal/releases)).
-
-If you are running only the Go binary, Go is not required.
-
-But if you are building Temporal or running it from source, [Go v1.16+ is required](https://github.com/temporalio/temporal/blob/master/CONTRIBUTING.md).
-
-While Temporal can be run as a single Go binary, we recommend that production deployments of Temporal Server should deploy each of the 4 internal services separately (if you are using Kubernetes, one service per pod) so they can be scaled independently in future.
-
-See below for a refresher on the 4 internal services:
-
-<details>
-<summary>
-Temporal Cluster Architecture
-</summary>
-
-import WhatIsCluster from "../concepts/what-is-a-temporal-cluster.md"
-
-<WhatIsCluster />
-
-</details>
-
-In practice, this means you will run each container with a flag specifying each service, e.g.
-
-```bash
-docker run
-    # persistence/schema setup flags omitted
-    -e SERVICES=history \                      -- Spinup one or more of: history, matching, worker, frontend
-    -e LOG_LEVEL=debug,info \                           -- Logging level
-    -e DYNAMIC_CONFIG_FILE_PATH=config/foo.yaml         -- Dynamic config file to be watched
-    temporalio/server:<tag>
-```
-
-[See the Docker source file](https://github.com/temporalio/temporal/tree/master/docker) for more details.
-
-Each release also ships a `Server with Auto Setup` Docker image that includes [an `auto-setup.sh` script](https://github.com/temporalio/docker-builds/blob/main/docker/auto-setup.sh) we recommend using for initial schema setup of each supported database. You should familiarize yourself with [what auto-setup does](/blog/auto-setup), as you will likely be replacing every part of the script to customize for your own infrastructure and tooling choices.
-
-Though **neither are blessed for production use**, you can consult our [Docker-Compose repo](https://github.com/temporalio/docker-compose) or [Helm Charts](https://github.com/temporalio/helm-charts) for more hints on configuration options.
 
 ## Minimum Requirements
 
@@ -89,13 +41,13 @@ The requirements of your Temporal system will vary widely based on your intended
 You will want to run your own proof of concept tests and watch for key metrics to understand the system health and scaling needs.
 
 - **[Configure your metrics subsystem](/references/configuration/#metrics).** Temporal supports three metrics providers out of the box via [Uber's Tally](https://github.com/uber-go/tally) interface: [StatsD](https://github.com/statsd/statsd), [Prometheus](https://prometheus.io/), and [M3](https://m3db.io/).
-  Tally offers [extensible custom metrics reporting](https://github.com/uber-go/tally#report-your-metrics), which we expose via [`temporal.WithCustomMetricsReporter`](/server/options/#withcustommetricsreporter).
+  Tally offers [extensible custom metrics reporting](https://github.com/uber-go/tally#report-your-metrics), which we expose via [`temporal.WithCustomMetricsReporter`](/references/server-options#withcustommetricsreporter).
   OpenTelemetry support is planned in the future.
 - **Set up monitoring.** You can use these [Grafana dashboards](https://github.com/temporalio/dashboards) as a starting point.
   The single most important metric to track is `schedule_to_start_latency` - if you get a spike in workload and don't have enough workers, your tasks will get backlogged. **We strongly recommend setting alerts for this metric**. This is usually emitted in client SDKs as both `temporal_activity_schedule_to_start_latency_*` and `temporal_workflow_task_schedule_to_start_latency_*` variants - see [the Prometheus GO SDK example](https://github.com/temporalio/samples-go/pull/65) and the [Go SDK source](https://community.temporal.io/t/strategies-for-scaling-aws-services/1577) and there are [plans to add it on the Server](https://github.com/temporalio/temporal/issues/1754).
   - Set up alerts for Workflow Task failures.
   - Also set up monitoring/alerting for all Temporal Workers for standard metrics like CPU/Memory utilization.
-- **Load testing.** You can use [the Maru benchmarking tool](https://github.com/temporalio/maru/) ([author's guide here](https://mikhail.io/2021/03/maru-load-testing-tool-for-temporal-workflows/)), see how we ourselves [stress test Temporal](/blog/temporal-deep-dive-stress-testing/), or write your own.
+- **Load testing.** You can use [the Maru benchmarking tool](https://github.com/temporalio/maru/) ([author's guide here](https://mikhail.io/2021/03/maru-load-testing-tool-for-temporal-workflows/)), see how we ourselves [stress test Temporal](https://temporalio/blog/temporal-deep-dive-stress-testing/), or write your own.
 
 All metrics emitted by the server are [listed in Temporal's source](https://github.com/temporalio/temporal/blob/master/common/metrics/defs.go).
 There are also equivalent metrics that you can configure from the client side.
@@ -125,11 +77,11 @@ With that said, here are some guidelines to some common bottlenecks:
 
 - **Database**. The vast majority of the time the database will be the bottleneck. **We highly recommend setting alerts on `schedule_to_start_latency`** to look out for this. Also check if your database connection is getting saturated.
 - **Internal services**. The next layer will be scaling the 4 internal services of Temporal ([Frontend, Matching, History, and Worker](/concepts/what-is-a-temporal-cluster)).
-  Monitor each accordingly. The Frontend service is more CPU bound, whereas the History and Matching services require more memory.
+  Monitor each accordingly. The Frontend Service is more CPU bound, whereas the History and Matching Services require more memory.
   If you need more instances of each service, spin them up separately with different command line arguments. You can learn more cross referencing [our Helm chart](https://github.com/temporalio/helm-charts) with our [Server Configuration reference](/references/configuration/).
-- See the **Server Limits** section below for other limits you will want to keep in mind when doing system design, including event history length.
+- See [Platform limits](/kb/temporal-platform-limits-sheet) for other limits you will want to keep in mind when doing system design, including event history length.
 
-Please see the dedicated docs on [Tuning and Scaling Workers](/operation/how-to-tune-workers).
+Please see the dedicated docs on [Tuning and Scaling Workers](/application-development/worker-performance).
 
 ## FAQs
 
@@ -143,7 +95,7 @@ We do plan to add features that give more visibility into the task queue state i
 
 ### FAQ: High Availability cluster configuration
 
-You can set up a high availability deployment by running more than one instance of the server. Temporal also handles [membership and routing](/blog/workflow-engine-principles/#membership-and-routing-1350). You can find more details in [the `clusterMetadata` section of the Server Configuration reference](/references/configuration/#clustermetadata).
+You can set up a high availability deployment by running more than one instance of the server. Temporal also handles [membership and routing](https://temporal.io/blog/workflow-engine-principles/#membership-and-routing-1350). You can find more details in [the `clusterMetadata` section of the Server Configuration reference](/references/configuration/#clustermetadata).
 
 ```yaml
 clusterMetadata:
@@ -174,33 +126,6 @@ You may sometimes want to have multiple parallel deployments on the same cluster
 - There is no need to change gRPC ports.
 
 [More details about the reason here](https://github.com/temporalio/temporal/issues/1234).
-
-## Server limits
-
-Running into limits can cause unexpected failures, so be mindful when you design your systems.
-Here is a comprehensive list of all the hard (error) / soft (warn) server limits relevant to operating Temporal:
-
-- **gRPC**: gRPC has 4MB size limit ([per each message received](https://github.com/grpc/grpc/blob/v1.36.2/include/grpc/impl/codegen/grpc_types.h#L466))
-- **Event Batch Size**: The `DefaultTransactionSizeLimit` limit is [4MB](https://github.com/temporalio/temporal/pull/1363).
-  This is the largest transaction size we allow for event histories to be persisted.
-  - This is configurable with `TransactionSizeLimit`, if you know what you are doing.
-- **Blob size limit**: For incoming payloads (including Workflow context) - _[source](https://github.com/temporalio/temporal/blob/v1.7.0/service/frontend/service.go#L133-L134)_
-  - we warn at 512KB: [`Blob size exceeds limit.`](https://github.com/temporalio/temporal/blob/fee1c43823699e90b330680a8efeb9d8dbee8cf3/common/util.go#L568)
-  - we error at 2MB: `ErrBlobSizeExceedsLimit: Blob data size exceeds limit.`
-  - This is configurable with [`BlobSizeLimitError` and `BlobSizeLimitWarn`](https://github.com/temporalio/temporal/blob/v1.7.0/service/history/configs/config.go#L378-L379), if you know what you are doing.
-- **History total size limit**: (leading to a terminated Workflow Execution)
-  - We warn at 10MB: `history size exceeds warn limit.`
-  - We error at 50mb: [`history size exceeds error limit.`](https://github.com/temporalio/temporal/blob/v1.7.0/service/history/workflowExecutionContext.go#L1204)
-  - This is configurable with [`HistorySizeLimitError` and `HistorySizeLimitWarn`](https://github.com/temporalio/temporal/blob/v1.7.0/service/history/configs/config.go#L380-L381), if you know what you are doing.
-- **History total count limit**: (leading to a terminated Workflow Execution)
-  - We warn at 10,000 events: `history size exceeds warn limit.`
-  - We error at 50,000 events: [`history size exceeds error limit.`](https://github.com/temporalio/temporal/blob/v1.7.0/service/history/workflowExecutionContext.go#L1204)
-  - This is configurable with [`HistoryCountLimitError` and `HistoryCountLimitWarn`](https://github.com/temporalio/temporal/blob/v1.7.0/service/history/configs/config.go#L382-L383), if you know what you are doing.
-- **Search Attributes**:
-  - **Number of Search Attributes**: max 100
-  - **Single Search Attribute Size**: 2KB
-  - **Total Search Attribute Size**: 40KB
-  - This is configurable with [`SearchAttributesNumberOfKeysLimit`, `SearchAttributesTotalSizeLimit` and `SearchAttributesSizeOfValueLimit`](https://github.com/temporalio/temporal/blob/v1.7.0/service/history/configs/config.go#L440-L442), if you know what you are doing.
 
 ## Securing Temporal
 

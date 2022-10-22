@@ -4,6 +4,14 @@ title: PHP SDK introduction
 sidebar_label: PHP SDK introduction
 ---
 
+:::info Try the Developer's guide
+
+The majority of this information has moved into the [Developer's guide](/application-development/?lang=php).
+
+However, if you can't find what you are looking for there, we recommend checking this doc set as well.
+
+:::
+
 ## Quick start
 
 1. Clone the [Temporal PHP SDK](https://github.com/temporalio/sdk-php) or add it as dependency to your project using a dependency management tool like composer:
@@ -18,11 +26,11 @@ sidebar_label: PHP SDK introduction
 
 ## Tutorials
 
-- You should orient yourself to the Hello World with [the PHP Hello World Walkthrough](/php/hello-world).
-- For those interested in distributed transactions, see the [Booking Saga Tutorial and code sample](/php/booking-saga-tutorial).
-- For a more non-trivial discussion of an application, see [the Subscription Tutorial](/php/subscription-tutorial) or [browse the code directly](https://github.com/temporalio/subscription-workflow-project-template-php).
+- You should orient yourself to the Hello World with [the PHP Hello World Walkthrough](https://learn.temporal.io/getting_started/php/hello_world_in_php/).
+- For those interested in distributed transactions, see the [Booking Saga Tutorial and code sample](https://learn.temporal.io/tutorials/php/booking_saga/).
+- For a more non-trivial discussion of an application, see [the Subscription Tutorial](https://learn.temporal.io/tutorials/php/subscriptions/) or [browse the code directly](https://github.com/temporalio/subscription-workflow-project-template-php).
 
-Much more detailed API samples can be viewed in [the Samples Repo](/samples-library/#php).
+Much more detailed API samples can be viewed in [the Samples Repo](https://github.com/temporalio/samples-php).
 
 ## Resources
 

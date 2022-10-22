@@ -243,7 +243,7 @@ Sending Signals and making Queries requires having a Workflow handle from a [Tem
 
 ```ts
 // // inside Client code! not Workflow code!
-import { increment, count } from './workflow';
+import { count, increment } from './workflow';
 
 // init client code omitted - see Client docs
 const handle = client.getHandle(workflowId);
@@ -297,8 +297,8 @@ function useState<T = any>(name: string, initialValue: T) {
 }
 
 // usage in Workflow file
-const store = useState('my-store', 10);
-function MyWorkflow() {
+const store = useState('your-store', 10);
+function YourWorkflow() {
   wf.setHandler(store.signal, (newValue: T) => {
     // console.log('updating', newValue) // optional but useful for debugging
     store.value = newValue;
@@ -341,8 +341,8 @@ function useState<T = any>(name: string, initialValue: T) {
 }
 
 // usage in Workflow file
-function MyWorkflow() {
-  const store = useState('my-store', 10); // needs to be inside because function uses setHandler
+function YourWorkflow() {
+  const store = useState('your-store', 10); // needs to be inside because function uses setHandler
   while (true) {
     console.log('sleeping for ', store.value);
     wf.sleep(store.value++ * 100); // you can mutate the value as well
@@ -350,8 +350,8 @@ function MyWorkflow() {
 }
 
 // usage in Client file
-await handle.signal('my-store', 30);
-const storeState = handle.query<number>('my-store'); // 30
+await handle.signal('your-store', 30);
+const storeState = handle.query<number>('your-store'); // 30
 ```
 
 </TabItem>
@@ -361,7 +361,7 @@ You can even conditionally set handlers, or set handlers inside handlers:
 
 ```ts
 import * as wf from '@temporalio/workflow';
-function MyWorkflow(signallable: boolean, signalNames: string[]) {
+function YourWorkflow(signallable: boolean, signalNames: string[]) {
   // conditional setting of handlers
   if (signallable) {
     wf.setHandler(MySignal, handler);
@@ -463,10 +463,10 @@ export async function unblocked() {
 }
 
 // usage: signals can be sent to each Workflow separately
-export async function myWorkflow1() {
+export async function yourWorkflow1() {
   await unblocked();
 }
-export async function myWorkflow2() {
+export async function yourWorkflow2() {
   await unblocked();
 }
 ```
@@ -481,7 +481,7 @@ Arguments for both are sent as needed.
 ```ts
 // Signal With Start in Client file
 const client = new WorkflowClient();
-await client.signalWithStart(MyWorkflow, {
+await client.signalWithStart(YourWorkflow, {
   workflowId,
   args: [arg1, arg2],
   signal: MySignal,
@@ -566,7 +566,7 @@ You can check the valid ISO string formats on [MDN's Date docs](https://develope
 
 :::caution Preventing Confusion: Workflow sleep vs Activity sleep
 
-There is an unrelated [`sleep` utility function](https://typescript.temporal.io/api/classes/activity.context/#sleep) available in **Activity Context** that is not durable, but is cancellation aware. See [the Activities docs for details](/typescript/activities).
+There is an unrelated [`sleep` utility function](https://typescript.temporal.io/api/classes/activity.Context/#sleep) available in **Activity Context** that is not durable, but is cancellation aware. See [the Activities docs for details](/typescript/activities).
 
 :::
 
@@ -676,12 +676,12 @@ Racing Signals
 Use `Promise.race` with Signals and Triggers to have a promise resolve at the earlier of either system time or human intervention.
 
 ```ts
-import { Trigger, sleep, defineSignal } from '@temporalio/workflow';
+import { defineSignal, sleep, Trigger } from '@temporalio/workflow';
 
 const userInteraction = new Trigger<boolean>();
 const completeUserInteraction = defineSignal('completeUserInteraction');
 
-export async function myWorkflow(userId: string) {
+export async function yourWorkflow(userId: string) {
   setHandler(completeUserInteraction, () => userInteraction.resolve(true)); // programmatic resolve
   const userInteracted = await Promise.race([
     userInteraction,
@@ -788,9 +788,9 @@ export class UpdatableTimer implements PromiseLike<void> {
 
 ### Triggers
 
-[Triggers](https://typescript.temporal.io/api/classes/workflow.trigger) are an experimental Promise-like concept in the TypeScript SDK.
+[Triggers](https://typescript.temporal.io/api/classes/workflow.Trigger) are a Promise-like concept in the TypeScript SDK.
 
-Triggers, like Promises, can be awaited and expose a `then` method.
+Triggers, like the [`condition()`](#condition) return value and other Promises, can be awaited and expose a `then` method.
 Unlike Promises, they export `resolve` or `reject` methods, so you can programmatically control them.
 
 <details>
@@ -799,12 +799,12 @@ Trigger Code Example
 </summary>
 
 ```ts
-import { Trigger, sleep, defineSignal } from '@temporalio/workflow';
+import { defineSignal, sleep, Trigger } from '@temporalio/workflow';
 
 const userInteraction = new Trigger<boolean>();
 const completeUserInteraction = defineSignal('completeUserInteraction');
 
-export async function myWorkflow(userId: string) {
+export async function yourWorkflow(userId: string) {
   setHandler(completeUserInteraction, () => userInteraction.resolve(true)); // programmatic resolve
   const userInteracted = await Promise.race([
     userInteraction,
@@ -819,8 +819,6 @@ export async function myWorkflow(userId: string) {
 `Trigger` is `CancellationScope`-aware. It is linked to the current scope on construction and throws when that scope is cancelled.
 
 </details>
-
-In most cases, you should now be able to use `condition` instead of Triggers, and we may deprecate Triggers in future.
 
 ## Child Workflows
 
@@ -1040,7 +1038,8 @@ const handle = await client.start(MyScheduleWorkflow, {
   args: [
     {
       cronParser: {
-        expression: '0 8 * * *', // every day 8am
+        // every day 8am
+        expression: '0 8 * * *',
         options: {
           currentDate: '2016-03-27 00:00:01',
           endDate: new Date('Wed, 26 Dec 2012 14:40:00 UTC'),

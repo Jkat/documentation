@@ -4,6 +4,7 @@ title: What is a List Filter?
 sidebar_label: List Filter
 description: A List Filter is the SQL-like string that is provided as the parameter to an Advanced Visibility List API.
 tags:
+  - term
   - explanation
   - filtered-lists
   - visibility
@@ -11,7 +12,7 @@ tags:
 
 A List Filter is the SQL-like string that is provided as the parameter to an [Advanced Visibility](/concepts/what-is-advanced-visibility) List API.
 
-- [How to use a List Filter using tctl](/tctl/workflow/list/#--query)
+- [How to use a List Filter using tctl](/tctl-v1/workflow#list)
 
 The following is an example List Filter:
 
@@ -25,10 +26,10 @@ A List Filter contains [Search Attribute](/concepts/what-is-a-search-attribute) 
 
 - The following operators are supported in List Filters:
 
-  - **AND, OR, ()**
   - **=, !=, >, >=, <, <=**
-  - **IN**
+  - **AND, OR, ()**
   - **BETWEEN ... AND**
+  - **IN**
   - **ORDER BY**
 
 - A List Filter applies to a single Namespace.

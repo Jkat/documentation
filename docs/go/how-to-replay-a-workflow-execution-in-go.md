@@ -8,7 +8,7 @@ tags:
   - how-to
 ---
 
-Use the [worker.WorflowReplayer](https://pkg.go.dev/go.temporal.io/sdk/worker#WorkflowReplayer) to replay an existing Workflow Execution from its Event History to replicate errors.
+Use the [worker.WorkflowReplayer](https://pkg.go.dev/go.temporal.io/sdk/worker#WorkflowReplayer) to replay an existing Workflow Execution from its Event History to replicate errors.
 
 For example, the following code retrieves the Event History of a Workflow:
 
@@ -36,7 +36,7 @@ func GetWorkflowHistory(ctx context.Context, client client.Client, id, runID str
 ```
 
 This history can then be used to _replay_.
-For example, the following code creates a `WorkflowReplayer` and register the `MyWorkflow` Workflow function.
+For example, the following code creates a `WorkflowReplayer` and register the `YourWorkflow` Workflow function.
 Then it calls the `ReplayWorkflowHistory` to _replay_ the Event History and return an error code.
 
 ```go
@@ -53,7 +53,7 @@ func ReplayWorkflow(ctx context.Context, client client.Client, id, runID string)
 		return err
 	}
 	replayer := worker.NewWorkflowReplayer()
-	replayer.RegisterWorkflow(MyWorkflow)
+	replayer.RegisterWorkflow(YourWorkflow)
 	return replayer.ReplayWorkflowHistory(nil, hist)
 }
 ```

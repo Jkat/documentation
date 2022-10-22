@@ -4,13 +4,14 @@ title: What is Asynchronous Activity Completion?
 sidebar_label: Asynchronous Activity Completion
 description: Asynchronous Activity Completion occurs when an external system provides the final result of a computation, started by an Activity, to the Temporal System.
 tags:
+  - term
   - explanation
 ---
 
 Asynchronous Activity Completion is a feature that enables an Activity Function to return without causing the Activity Execution to complete.
 The Temporal Client can then be used to both Heartbeat Activity Execution progress and eventually provide a result.
 
-- [How to complete an Activity Asynchronously](/application-development-guide#async-activity-completion)
+- [How to complete an Activity Asynchronously](/application-development/features#asynchronous-activity-completion)
 
 #### When to use Async Completion
 

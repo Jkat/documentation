@@ -30,13 +30,13 @@ return "", activity.ErrResultPending
 // Instantiate a Temporal service client.
 // The same client can be used to complete or fail any number of Activities.
 // The client is a heavyweight object that should be created once per process.
-temporalClient, err := client.NewClient(client.Options{})
+temporalClient, err := client.Dial(client.Options{})
 
 // Complete the Activity.
 temporalClient.CompleteActivity(context.Background(), taskToken, result, nil)
 ```
 
-Following are the parameters of the `CompleteActivity` function:
+The following are the parameters of the `CompleteActivity` function:
 
 - `taskToken`: The value of the binary `TaskToken` field of the `ActivityInfo` struct retrieved inside
   the Activity.

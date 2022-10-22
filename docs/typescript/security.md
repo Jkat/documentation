@@ -5,16 +5,6 @@ sidebar_label: Connection & Security
 description: A summary of the security features you should know as a TypeScript SDK user.
 ---
 
-import CustomWarning from "../components/CustomWarning.js"
-
-<CustomWarning>
-
-Custom DataConverters are a standard SDK security feature that is not yet available in the TypeScript Beta.
-
-The Connection API is not final and may change slightly before the full launch.
-
-</CustomWarning>
-
 Temporal Workers and Clients connect with your Temporal Cluster via gRPC, and must be configured securely for production.
 There are three main features to know:
 
@@ -42,19 +32,19 @@ const connection = await Connection.connect();
 
 const client = new WorkflowClient({
   connection,
-  namespace: 'my-namespace-name', // defaults to 'default'
+  namespace: 'your-custom-namespace', // defaults to 'default'
 });
 ```
 
 ## Encryption in transit with mTLS
 
-There are two classes in the SDK that connect to the Temporal server, the [Worker](https://typescript.temporal.io/api/classes/worker.worker) and the client [Connection](https://typescript.temporal.io/api/classes/client.connection/).
+There are two classes in the SDK that connect to the Temporal server, the [Worker](https://typescript.temporal.io/api/classes/worker.Worker) and the client [Connection](https://typescript.temporal.io/api/classes/client.Connection/).
 When instantiating either of them, you may choose whether to connect securely or not.
 
-- In order to connect to the server using TLS, set a _truthy_ value (`true` or [TLSConfig](https://typescript.temporal.io/api/interfaces/common.tlsconfig/) for custom options) in the `tls` configuration option.
-- Use [`ServerOptions.tls`](https://typescript.temporal.io/api/interfaces/worker.serveroptions#tls) when [creating](https://typescript.temporal.io/api/classes/worker.worker/#create) a new Worker and
-  [`ConnectionOptions.tls`](https://typescript.temporal.io/api/interfaces/client.connectionoptions#tls) for the [`Connection`](https://typescript.temporal.io/api/classes/client.connection) constructor.
-- The client connection also accepts [gRPC credentials](https://grpc.github.io/grpc/node/grpc.credentials.html) at [`ConnectionOptions.credentials`](https://typescript.temporal.io/api/interfaces/client.connectionoptions#tls) as long as `tls` is not also specified.
+- In order to connect to the server using TLS, set a _truthy_ value (`true` or [TLSConfig](https://typescript.temporal.io/api/interfaces/client.TLSConfig) for custom options) in the `tls` configuration option.
+- Use [`ServerOptions.tls`](https://typescript.temporal.io/api/interfaces/worker.ServerOptions#tls) when [creating](https://typescript.temporal.io/api/classes/worker.Worker/#create) a new Worker and
+  [`ConnectionOptions.tls`](https://typescript.temporal.io/api/interfaces/client.ConnectionOptions#tls) for the [`Connection`](https://typescript.temporal.io/api/classes/client.Connection) constructor.
+- The client connection also accepts [gRPC credentials](https://grpc.github.io/grpc/node/grpc.credentials.html) at [`ConnectionOptions.credentials`](https://typescript.temporal.io/api/interfaces/client.ConnectionOptions#tls) as long as `tls` is not also specified.
 
 A full example for Clients looks like this:
 
@@ -62,7 +52,8 @@ A full example for Clients looks like this:
 import { Connection, WorkflowClient } from '@temporalio/client';
 
 const connection = await Connection.connect({
-  address: 'foo.bar.tmprl.cloud', // defaults port to 7233 if not specified
+  // defaults port to 7233 if not specified
+  address: 'foo.bar.tmprl.cloud',
   tls: {
     // set to true if TLS without mTLS
     // See docs for other TLS options
@@ -81,7 +72,7 @@ const client = new WorkflowClient({
 A full example for Workers looks like this:
 
 ```js
-import { Worker, NativeConnection } from '@temporalio/worker';
+import { NativeConnection, Worker } from '@temporalio/worker';
 import * as activities from './activities';
 
 async function run() {
@@ -152,7 +143,7 @@ _Thanks to our Design Partner [Mina Abadir](https://twitter.com/abadir_) for sha
 
 ### Connecting to Temporal Cloud (with mTLS)
 
-[The Hello World mTLS sample](https://github.com/temporalio/samples-node/tree/main/hello-world-mtls/) shows how to connect to a Temporal Cloud account.
+[The Hello World mTLS sample](https://github.com/temporalio/samples-typescript/tree/main/hello-world-mtls/) shows how to connect to a Temporal Cloud account.
 After signing up for Temporal Cloud, you should have a namespace, a server address, and a client certificate and key. Use the following environment variables to set up the sample:
 
 - **TEMPORAL_ADDRESS**: looks like `foo.bar.tmprl.cloud` (NOT web.foo.bar.tmprl.cloud)
@@ -169,11 +160,14 @@ There is another var, `TEMPORAL_TASK_QUEUE`, which the example defaults to `'hel
 ```ts
 export function getEnv(): Env {
   return {
-    address: 'foo.bar.tmprl.cloud', // NOT web.foo.bar.tmprl.cloud
-    namespace: 'foo.bar', // as assigned
-    clientCertPath: 'foobar.pem', // in project root
-    clientKeyPath: 'foobar.key', // in project root
-    taskQueue: process.env.TEMPORAL_TASK_QUEUE || 'hello-world-mtls', // just to ensure task queue is same on client and worker, totally optional
+    // NOT web.foo.bar.tmprl.cloud
+    address: 'foo.bar.tmprl.cloud',
+    namespace: 'foo.bar',
+    // in project root
+    clientCertPath: 'foobar.pem',
+    clientKeyPath: 'foobar.key',
+    // just to ensure task queue is same on client and worker, totally optional
+    taskQueue: process.env.TEMPORAL_TASK_QUEUE || 'hello-world-mtls',
     // // not usually needed
     // serverNameOverride: process.env.TEMPORAL_SERVER_NAME_OVERRIDE,
     // serverRootCACertificatePath: process.env.TEMPORAL_SERVER_ROOT_CA_CERT_PATH,
@@ -187,8 +181,8 @@ If you have misconfigured your connection somehow, you will get an opaque `[Tran
 
 Note the difference between the gRPC and Temporal Web endpoints:
 
-- The gRPC endpoint has a DNS address of `<Namespace ID>.tmprl.cloud`, for example: `accounting-production.f45a2.tmprl.cloud`.
-- The Temporal Web endpoint is `web.<Namespace ID>.tmprl.cloud`, for example: `https://web.accounting-production.f45a2.tmprl.cloud`.
+- The gRPC endpoint has a DNS address of `<Namespace_ID>.tmprl.cloud`, for example: `accounting-production.f45a2.tmprl.cloud`.
+- The Temporal Web endpoint is `web.<Namespace_ID>.tmprl.cloud`, for example: `https://web.accounting-production.f45a2.tmprl.cloud`.
 
 ### Local mTLS sample tutorial
 

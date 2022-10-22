@@ -2,7 +2,7 @@
 id: clusters
 title: Clusters
 sidebar_label: Clusters
-description: Temporal Clusters explained.
+description: This guide provides a comprehensive overview of Temporal Clusters.
 toc_max_heading_level: 4
 ---
 
@@ -11,21 +11,21 @@ toc_max_heading_level: 4
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-Temporal Clusters explained.
+This guide provides a comprehensive overview of Temporal Clusters.
 
 A Temporal Cluster is the group of services, known as the [Temporal Server](#temporal-server), combined with persistence stores, that together act as a component of the Temporal Platform.
 
-- [How to quickly install a Temporal Cluster for testing and development](/next/application-development/foundations#run-a-dev-cluster)
+- [How to quickly install a Temporal Cluster for testing and development](/application-development/foundations#run-a-dev-cluster)
 - [Cluster deployment guide](/cluster-deployment-guide)
 
 ![A Temporal Cluster (Server + persistence)](/diagrams/temporal-cluster.svg)
 
-#### Persistence
+### Persistence
 
 A Temporal Cluster's only required dependency for basic operation is a database.
-Multiple types of databases that are supported.
+Multiple types of databases are supported.
 
-![Persistence](/diagrams/temporal-database.svg)
+<div class="tdiw"><div class="tditw"><p class="tdit">Persistence</p></div><div class="tdiiw"><img class="tdi" src="/diagrams/temporal-database.svg" alt="Persistence" /></div></div>
 
 The database stores the following types of data:
 
@@ -37,9 +37,9 @@ The database stores the following types of data:
 - Visibility data: Enables operations like "show all running Workflow Executions".
   For production environments, we recommend using Elasticsearch.
 
-An Elasticsearch database can be added to enable [Advanced Visibility](/next/visibility#advanced-visibility).
+An Elasticsearch database can be added to enable [Advanced Visibility](/visibility#advanced-visibility).
 
-**Versions**
+#### Dependency versions
 
 Temporal tests compatibility by spanning the **minimum** and **maximum** stable non-EOL major versions for each supported database.
 As of time of writing, these specific versions are used in our test pipelines and actively tested before we release any version of Temporal:
@@ -58,7 +58,7 @@ The release notes of each Temporal Server declare when we plan to drop support f
 - Temporal is [working on official SQLite v3.x persistence](https://github.com/temporalio/temporal/pulls?q=is%3Apr+sort%3Aupdated-desc+sqlite), but this is meant only for development and testing, not production usage.
   Cassandra, MySQL, and PostgreSQL schemas are supported and thus can be used as the Server's database.
 
-#### Monitoring & observation
+### Monitoring and observation
 
 Temporal emits metrics by default in a format that is supported by Prometheus.
 Monitoring and observing those metrics is optional.
@@ -67,29 +67,85 @@ Any software that can pull metrics that supports the same format could be used, 
 - **Prometheus >= v2.0**
 - **Grafana >= v2.5**
 
-#### Visibility
+### Visibility
 
-Temporal has built-in [Visibility](/next/visibility#) features.
-To enhance this feature, Temporal supports an [integration with Elasticsearch](/next/cluster-deployment-guide#advanced-visibility).
+Temporal has built-in [Visibility](/visibility#) features.
+To enhance this feature, Temporal supports an [integration with Elasticsearch](/cluster-deployment-guide#elasticsearch).
 
+- Elasticsearch v8 is supported from Temporal version 1.18.0 onwards
 - Elasticsearch v7.10 is supported from Temporal version 1.7.0 onwards
-- Elasticsearch v6.8 is supported in all Temporal versions
-- Both versions are explicitly supported with AWS Elasticsearch
+- Elasticsearch v6.8 is supported up to Temporal version 1.17.x
+- Elasticsearch v6.8 and v7.10 versions are explicitly supported with AWS Elasticsearch
+
+### mTLS encryption
+
+Temporal supports Mutual Transport Layer Security (mTLS) as a method of encrypting network traffic between services within a Temporal Cluster, or between application processes and a Cluster.
+
+Mutual TLS can be enabled in Temporal’s [TLS configuration](/references/configuration#tls).
+This configuration can be passed through `WithConfig` or `WithConfigLoader`.
+
+This configuration includes two sections that serve to separate intra-cluster and external traffic. That way, different certificates and settings can be used to encrypt each section of traffic:
+
+- `internode`: configuration for encrypting communication between nodes within the Cluster.
+- `frontend`: configuration for encrypting the Frontend's public endpoints
+
+### Temporal Client connections
+
+A client's network access can be limited by using certificates issued by a specific Certificate Authority (CA).
+
+To restrict access to Temporal Cluster endpoints, use the `clientCAFiles` or `clientCAData` property and the `requireClientAuth` property.
+These properties can be specified in both the `internode` and `frontend` sections of the [mTLS configuration](/references/configuration#tls).
+
+#### Server name specification
+
+Specify the `serverName` in the `client` section of your mTLS configuration to prevent spoofing and [MITM attacks](https://en.wikipedia.org/wiki/Man-in-the-middle_attack).
+
+Entering a value for `serverName` enables established connections to authenticate the endpoint.
+This ensures that the server certificate presented to any connected client has the specified server name in its CN property.
+
+This measure can be used for `internode` and `frontend` endpoints.
+
+For more information on mTLS configuration, refer to our [TLS configuration guide](/references/configuration#tls).
+
+### Auth
+
+**Authentication** is the process of verifying users who want to access your application are actually the users you want accessing it.
+**Authorization** is the verification of applications and data that a user on your Cluster or application has access to.
+
+Temporal has several authentication protocols that can be set to restrict access to your data.
+These protocols address three areas: servers, client connections, and users.
+
+Server attacks can be prevented by specifying `serverName` in the `client` section of your mTLS configuration.
+This can be done for both `frontend` and `internode` endpoints.
+
+Client connections can be restricted to certain endpoints by requiring certificates from a specific CA.
+Modify the `clientCaFiles`, `clientCaData`, and `requireClientAuth` properties in the `internode` and `frontend` sections of the mTLS configuration.
+
+User access can be restricted through extensibility points and plugins.
+When implemented, the `frontend` invokes the plugin before executing the requested operation.
+
+Temporal offers two plugin interfaces for API call authentication and authorization.
+
+- [`ClaimMapper`](#claim-mapper)
+- [`Authorizer`](#authorizer-plugin)
+
+The logic of both plugins can be customized to fit a variety of use cases.
+When provided, the frontend invokes the implementation of the plugins before running the requested operation.
 
 ## Temporal Server
 
 The Temporal Server consists of four independently scalable services:
 
-- Frontend gateway: for rate limiting, routing, authorizing
-- History subsystem: maintains data (mutable state, queues, and timers)
-- Matching subsystem: hosts Task Queues for dispatching
-- Worker service: for internal background workflows
+- Frontend gateway: for rate limiting, routing, authorizing.
+- History subsystem: maintains data (mutable state, queues, and timers).
+- Matching subsystem: hosts Task Queues for dispatching.
+- Worker Service: for internal background Workflows.
 
-For example, a real-life production deployment can have 5 Frontend, 15 History, 17 Matching, and 3 Worker services per cluster.
+For example, a real-life production deployment can have 5 Frontend, 15 History, 17 Matching, and 3 Worker Services per cluster.
 
 The Temporal Server services can run independently or be grouped together into shared processes on one or more physical or virtual machines.
 For live (production) environments, we recommend that each service runs independently, because each one has different scaling requirements and troubleshooting becomes easier.
-The History, Matching, and Worker services can scale horizontally within a Cluster.
+The History, Matching, and Worker Services can scale horizontally within a Cluster.
 The Frontend Service scales differently than the others because it has no sharding or partitioning; it is just stateless.
 
 Each service is aware of the others, including scaled instances, through a membership protocol via [Ringpop](https://github.com/temporalio/ringpop-go).
@@ -113,20 +169,20 @@ We offer maintenance support of **major** versions for at least 12 months after 
 Temporal offers official support for, and is tested against, dependencies with the exact versions described in the `go.mod` file of the corresponding release tag.
 (For example, [v1.5.1](https://github.com/temporalio/temporal/tree/v1.5.1) dependencies are documented in [the go.mod for v1.5.1](https://github.com/temporalio/temporal/blob/v1.5.1/go.mod).)
 
-#### Frontend Service
+### Frontend Service
 
 The Frontend Service is a stateless gateway service that exposes a strongly typed [Proto API](https://github.com/temporalio/api/blob/master/temporal/api/workflowservice/v1/service.proto).
 The Frontend Service is responsible for rate limiting, authorizing, validating, and routing all inbound calls.
 
-![Frontend Service](/diagrams/temporal-frontend-service.svg)
+<div class="tdiw"><div class="tditw"><p class="tdit">Frontend Service</p></div><div class="tdiiw"><img class="tdi" src="/diagrams/temporal-frontend-service.svg" alt="Frontend Service" /></div></div>
 
 Types of inbound calls include the following:
 
-- Domain CRUD
+- [Namespace](/namespaces#) CRUD
 - External events
 - Worker polls
-- Visibility requests
-- Admin operations via [tctl](/tctl) (the Temporal CLI)
+- [Visibility](/visibility#) requests
+- [tctl](/tctl-v1) (the Temporal CLI) operations
 - Calls from a remote Cluster related to [Multi-Cluster Replication](#multi-cluster-replication)
 
 Every inbound request related to a Workflow Execution must have a Workflow Id, which is hashed for routing purposes.
@@ -134,77 +190,115 @@ The Frontend Service has access to the hash rings that maintain service membersh
 
 Inbound call rate limiting is applied per host and per namespace.
 
-The Frontend service talks to the Matching service, History service, Worker service, the database, and Elasticsearch (if in use).
+The Frontend Service talks to the Matching Service, History Service, Worker Service, the database, and Elasticsearch (if in use).
 
 - It uses the grpcPort 7233 to host the service handler.
 - It uses port 6933 for membership-related communication.
 
-#### History service
+Ports are configurable in the Cluster configuration.
 
-The History Service tracks the state of Workflow Executions.
+### History Service
 
-![History Service](/diagrams/temporal-history-service.svg)
+The History Service is responsible for persisting Workflow Execution state and determining what to do next to progress the Workflow Execution by using [History Shards](#history-shard).
 
-The History Service scales horizontally via individual shards, configured during the Cluster's creation.
-The number of shards remains static for the life of the Cluster (so you should plan to scale and over-provision).
+<div class="tdiw"><div class="tditw"><p class="tdit">History Service</p></div><div class="tdiiw"><img class="tdi" src="/diagrams/temporal-history-service.svg" alt="History Service" /></div></div>
 
-Each shard maintains data (routing identifiers, mutable state) and queues.
-A History shard maintains four types of queues:
+The total number of History Services can be between 1 and the total number of History Shards.
+An individual History Service can support a large number of History Shards.
+Temporal recommends starting at a ratio of 1 History Service for every 500 History Shards.
 
-- Transfer queue: transfers internal tasks to the Matching Service.
-  Whenever a new Workflow Task needs to be scheduled, the History Service transactionally dispatches it to the Matching Service.
-- Timer queues: durably persists Timers.
-- Replicator queue: asynchronously replicates Workflow Executions from active Clusters to other passive Clusters (experimental Multi-Cluster feature).
-- Visibility queue: pushes data to the visibility index (Elasticsearch).
+Although the total number of History Shards remains static for the life of the Cluster, the number of History Services can change.
 
-The History service talks to the Matching Service and the Database.
+The History Service talks to the Matching Service and the database.
 
 - It uses grpcPort 7234 to host the service handler.
 - It uses port 6934 for membership-related communication.
 
-#### Matching service
+Ports are configurable in the Cluster configuration.
 
-The Matching Service is responsible for hosting Task Queues for Task dispatching.
+#### History Shard
 
-![Matching Service](/diagrams/temporal-matching-service.svg)
+A History Shard is an important unit within a Temporal Cluster by which the scale of concurrent Workflow Execution throughput can be measured.
+
+Each History Shard maps to a single persistence partition.
+A History Shard assumes that only be one concurrent operation can be within a partition at a time.
+In essence, the number of History Shards represents the number of concurrent database operations that can occur for a Cluster.
+This means that the number of History Shards in a Temporal Cluster plays a significant role in the performance of your Temporal Application.
+
+Before integrating a database, the total number of History Shards for the Temporal Cluster must be chosen and set in the Cluster's configuration (see [persistence](/references/configuration#persistence)).
+After the Shard count is configured and the database integrated, the total number of History Shards for the Cluster cannot be changed.
+
+In theory, a Temporal Cluster can operate with an unlimited number of History Shards, but each History Shard adds compute overhead to the Cluster.
+Temporal Clusters have operated successfully using anywhere from 1 to 128K History Shards, with each Shard responsible for tens of thousands of Workflow Executions.
+One Shard is useful only in small scale setups designed for testing, while 128k Shards is useful only in very large scale production environments.
+The correct number of History Shards for any given Cluster depends entirely on the Temporal Application that it is supporting and the type of database.
+
+A History Shard is represented as a hashed integer.
+Each Workflow Execution is automatically assigned to a History Shard.
+The assignment algorithm hashes Workflow Execution metadata such as Workflow Id and Namespace and uses that value to match a History Shard.
+
+Each History Shard maintains the Workflow Execution Event History, Workflow Execution mutable state, and the following internal Task Queues:
+
+- Internal Transfer Task Queue: Transfers internal tasks to the Matching Service.
+  Whenever a new Workflow Task needs to be scheduled, the History Service's Transfer Task Queue Processor transactionally dispatches it to the Matching Service.
+- Internal Timer Task Queue: Durably persists Timers.
+- Internal Replicator Task Queue: Asynchronously replicates Workflow Executions from active Clusters to other passive Clusters.
+  (Relies on the experimental Multi-Cluster feature.)
+- Internal Visibility Task Queue: Pushes data to the [Advanced Visibility](/visibility#advanced-visibility) index.
+
+### Matching Service
+
+The Matching Service is responsible for hosting user-facing [Task Queues](/tasks#task-queue) for Task dispatching.
+
+<div class="tdiw"><div class="tditw"><p class="tdit">Matching Service</p></div><div class="tdiiw"><img class="tdi" src="/diagrams/temporal-matching-service.svg" alt="Matching Service" /></div></div>
 
 It is responsible for matching Workers to Tasks and routing new Tasks to the appropriate queue.
 This service can scale internally by having multiple instances.
 
-It talks to the Frontend service, History service, and the database.
+It talks to the Frontend Service, History Service, and the database.
 
 - It uses grpcPort 7235 to host the service handler.
 - It uses port 6935 for membership related communication.
 
-#### Worker service
+Ports are configurable in the Cluster configuration.
 
-The Worker Service runs background processing for the replication queue, system Workflows, and (in versions older than 1.5.0) the Kafka visibility processor.
+### Worker Service
 
-![Worker Service](/diagrams/temporal-worker-service.svg)
+The Worker Service runs background processing for the eplication queue, system Workflows, and (in versions older than 1.5.0) the Kafka visibility processor.
 
-It talks to the Frontend service.
+<div class="tdiw"><div class="tditw"><p class="tdit">Worker Service</p></div><div class="tdiiw"><img class="tdi" src="/diagrams/temporal-worker-service.svg" alt="Worker Service" /></div></div>
+
+It talks to the Frontend Service.
 
 - It uses port 6939 for membership-related communication.
 
-## Retention Period
+Ports are configurable in the Cluster configuration.
 
-A Retention Period is the amount of time a Workflow Execution Event History remains in the Cluster's persistence store.
+### Retention Period
 
-- [How to set the Retention Period for the Namespace](/tctl/namespace/register/#--retention)
+Retention Period is the duration for which the Temporal Cluster stores data associated with closed Workflow Executions on a Namespace in the Persistence store.
 
-A Retention Period applies to a single [Namespace](/next/namespaces#) and is set when the Namespace is registered.
+- [How to set the Retention Period for a Namespace](/tctl-v1/namespace#register)
+- [How to set the Retention Period for a Namespace using an SDK](/application-development/features/#namespaces)
 
-If the Retention Period isn't set, it defaults to 2 days.
+A Retention Period applies to all closed Workflow Executions within a [Namespace](/namespaces#) and is set when the Namespace is registered.
+
+The Temporal Cluster triggers a Timer task at the end of the Retention Period that cleans up the data associated with the closed Workflow Execution on that Namespace.
+mutable
 The minimum Retention Period is 1 day.
-The maximum Retention Period is 30 days.
+On Temporal Cluster version 1.18 and later, the maximum Retention Period value for Namespaces can be set to anything over the minimum requirement of 1 day. Ensure that your Persistence store has enough capacity for the storage.
+On Temporal Cluster versions 1.17 and earlier, the maximum Retention Period you can set is 30 days.
 Setting the Retention Period to 0 results in the error _A valid retention period is not set on request_.
+
+If you don't set the Retention Period value when using the [`tctl namespace register`](/tctl-v1/namespace#register) command, it defaults to 3 days.
+If you don't set the Retention Period value when using the [`RegisterNamespaceRequest`](/application-development/features/#namespaces) API, it returns an error.
 
 ## Archival
 
-Archival is a feature that automatically backs up [Event Histories](/next/workflows#event-history) and Visibility records from Temporal Cluster persistence to a custom blob store.
+Archival is a feature that automatically backs up [Event Histories](/workflows#event-history) and Visibility records from Temporal Cluster persistence to a custom blob store.
 
-- [How to set up Archival](/next/cluster-deployment-guide#set-up)
-- [How to create a custom Archiver](/next/cluster-deployment-guide#custom-archiver)
+- [How to create a custom Archiver](/cluster-deployment-guide#custom-archiver)
+- [How to set up Archival](/cluster-deployment-guide#set-up-archival)
 
 Workflow Execution Event Histories are backed up after the [Retention Period](/concepts/what-is-a-namespace/#retention-period) is reached.
 Visibility records are backed up immediately after a Workflow Execution reaches a Closed status.
@@ -215,7 +309,7 @@ This feature is helpful for compliance and debugging.
 
 Temporal's Archival feature is considered **experimental** and not subject to normal [versioning and support policy](/clusters).
 
-Archival is not supported when running Temporal via docker-compose and is disabled by default when installing the system manually and when deploying via [helm charts](https://github.com/temporalio/helm-charts/blob/master/templates/server-configmap.yaml) (but can be enabled in the [config](https://github.com/temporalio/temporal/blob/master/config/development.yaml)).
+Archival is not supported when running Temporal via docker-compose and is disabled by default when installing the system manually and when deploying through [helm charts](https://github.com/temporalio/helm-charts/blob/master/templates/server-configmap.yaml) (but can be enabled in the [config](https://github.com/temporalio/temporal/blob/master/config/development.yaml)).
 
 ## Multi-Cluster Replication
 
@@ -225,7 +319,7 @@ When necessary, for higher availability, Cluster operators can failover to any o
 Temporal's Multi-Cluster Replication feature is considered **experimental** and not subject to normal [versioning and support policy](/clusters).
 
 Temporal automatically forwards Start, Signal, and Query requests to the active Cluster.
-This feature must be enabled through a Dynamic Config flag per [Global Namespace](/next/namespaces#global-namespace).
+This feature must be enabled through a Dynamic Config flag per [Global Namespace](/namespaces#global-namespace).
 
 When the feature is enabled, Tasks are sent to the Parent Task Queue partition that matches that Namespace, if it exists.
 
@@ -618,3 +712,152 @@ T = 2: task A is loaded.
 
 At this time, due to the rebuild of a Workflow Execution's mutable state (conflict resolution), Task A is no longer relevant (Task A's corresponding Event belongs to non-current branch).
 Task processing logic will verify both the Event Id and version of the Task against a corresponding Workflow Execution's mutable state, then discard task A.
+
+## Plugins
+
+Temporal Clusters support some pluggable components.
+
+### Claim Mapper
+
+The Claim Mapper component is a pluggable component that extracts Claims from JSON Web Tokens (JWTs).
+
+This process is achieved with the method `GetClaims`, which translates `AuthInfo` structs from the caller into `Claims` about the caller's roles within Temporal.
+
+A `Role` (within Temporal) is a bit mask that combines one or more of the role constants.
+In the following example, the role is assigned constants that allow the caller to read and write information.
+
+```go
+role := authorization.RoleReader | authorization.RoleWriter
+```
+
+`GetClaims` is customizable and can be modified with the `temporal.WithClaimMapper` server option.
+Temporal also offers a default JWT `ClaimMapper` for your use.
+
+A typical approach is for `ClaimMapper` to interpret custom `Claims` from a caller's JWT, such as membership in groups, and map them to Temporal roles for the user.
+The subject information from the caller's mTLS certificate can also be a parameter in determining roles.
+
+#### `AuthInfo`
+
+`AuthInfo` is a struct that is passed to `GetClaims`. `AuthInfo` contains an authorization token extracted from the `authorization` header of the gRPC request.
+
+`AuthInfo` includes a pointer to the `pkix.Name` struct.
+This struct contains an [x.509](https://www.ibm.com/docs/en/ibm-mq/7.5?topic=certificates-distinguished-names) Distinguished Name from the caller's mTLS certificate.
+
+#### `Claims`
+
+`Claims` is a struct that contains information about permission claims granted to the caller.
+
+`Authorizer` assumes that the caller has been properly authenticated, and trusts the `Claims` when making an authorization decision.
+
+#### Default JWT ClaimMapper
+
+Temporal offers a default JWT `ClaimMapper` that extracts the information needed to form Temporal `Claims`.
+This plugin requires a public key to validate digital signatures.
+
+To get an instance of the default JWT `ClaimMapper`, call `NewDefaultJWTClaimMapper` and provide it with the following:
+
+- a `TokenKeyProvider` instance
+- a `config.Authorization` pointer
+- a logger
+
+The code for the default `ClaimMapper` can also be used to build a custom `ClaimMapper`.
+
+#### Token key provider
+
+A `TokenKeyProvider` obtains public keys from specified issuers' URIs that adhere to a specific format.
+The default JWT `ClaimMapper` uses this component to obtain and refresh public keys over time.
+
+Temporal provides an `rsaTokenKeyProvider`.
+This component dynamically obtains public keys that follow the [JWKS format](https://tools.ietf.org/html/rfc7517).
+`rsaTokenKeyProvider` uses only the `RSAKey` and `Close` methods.
+
+```go
+provider := authorization.NewRSAKeyProvider(cfg)
+```
+
+:::note
+
+`KeySourceURIs` are the HTTP endpoints that return public keys of token issuers in the [JWKS format](https://tools.ietf.org/html/rfc7517).
+`RefreshInterval` defines how frequently keys should be refreshed.
+For example, [Auth0](https://auth0.com/) exposes endpoints such as `https://YOUR_DOMAIN/.well-known/jwks.json`.
+
+:::
+
+By default, "permissions" is used to name the `permissionsClaimName` value.
+
+Configure the plugin with `config.Config.Global.Authorization.JWTKeyProvider`.
+
+#### JSON Web Token format
+
+The default JWT `ClaimMapper` expects authorization tokens to be formatted as follows:
+
+```
+Bearer <token>
+```
+
+The Permissions Claim in the JWT Token is expected to be a collection of Individual Permission Claims.
+Each Individual Permission Claim must be formatted as follows:
+
+```
+<namespace> : <permission>
+```
+
+These permissions are then converted into Temporal roles for the caller.
+This can be one of Temporal's four values:
+
+- read
+- write
+- worker
+- admin
+
+Multiple permissions for the same Namespace are overridden by the `ClaimMapper`.
+
+##### Example of a payload for the default JWT ClaimMapper
+
+```
+{
+   "permissions":[
+      "system:read",
+      "namespace1:write"
+   ],
+   "aud":[
+      "audience"
+   ],
+   "exp":1630295722,
+   "iss":"Issuer"
+}
+```
+
+### Authorizer Plugin
+
+The `Authorizer` plugin contains a single `Authorize` method, which is invoked for each incoming API call.
+`Authorize` receives information about the API call, along with the role and permission claims of the caller.
+
+`Authorizer` allows for a wide range of authorization logic, including call target, role/permissions claims, and other data available to the system.
+
+#### Configuration
+
+The following arguments must be passed to `Authorizer`:
+
+- `context.Context`: General context of the call.
+- `authorization.Claims`: Claims about the roles assigned to the caller. Its intended use is described in the [`Claims`](#claims) section earlier on this page.
+- `authorization.CallTarget`: Target of the API call.
+
+`Authorizer` then returns one of two decisions:
+
+- `DecisionDeny`: the requested API call is not invoked and an error is returned to the caller.
+- `DecisionAllow`: the requested API call is invoked.
+
+:::warning
+
+`Authorizer` allows all API calls pass by default. Disable the `nopAuthority` authorizer and configure your own to prevent this behavior.
+
+:::
+
+Configure your `Authorizer` when you start the server via the [`temporal.WithAuthorizer`](/references/server-options#withauthorizer) server option.
+
+If an `Authorizer` is not set in the server options, Temporal uses the `nopAuthority` authorizer that unconditionally allows all API calls to pass through.
+
+```go
+a := authorization.NewDefaultAuthorizer()
+```

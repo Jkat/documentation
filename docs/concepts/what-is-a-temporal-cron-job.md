@@ -4,6 +4,7 @@ title: What is a Temporal Cron Job?
 sidebar_label: Temporal Cron Job
 description: A Temporal Cron Job is the series of Workflow Executions that occur when a Cron Schedule is provided in the call to spawn a Workflow Execution.
 tags:
+  - term
   - explanation
 ---
 
@@ -63,13 +64,13 @@ Use the [crontab guru site](https://crontab.guru/) to test your cron expressions
 You can also pass any of the [predefined schedules](https://pkg.go.dev/github.com/robfig/cron/v3#hdr-Predefined_schedules) or [intervals](https://pkg.go.dev/github.com/robfig/cron/v3#hdr-Intervals) described in the [`robfig/cron` documentation](https://pkg.go.dev/github.com/robfig/cron/v3).
 
 ```
-Schedules              | Description                                | Equivalent To
------                  | -----------                                | -------------
-@yearly (or @annually) | Run once a year, midnight, Jan. 1st        | 0 0 1 1 *
-@monthly               | Run once a month, midnight, first of month | 0 0 1 * *
-@weekly                | Run once a week, midnight between Sat/Sun  | 0 0 * * 0
-@daily (or @midnight)  | Run once a day, midnight                   | 0 0 * * *
-@hourly                | Run once an hour, beginning of hour        | 0 * * * *
+| Schedules              | Description                                | Equivalent To |
+| ---------------------- | ------------------------------------------ | ------------- |
+| @yearly (or @annually) | Run once a year, midnight, Jan. 1st        | 0 0 1 1 *     |
+| @monthly               | Run once a month, midnight, first of month | 0 0 1 * *     |
+| @weekly                | Run once a week, midnight between Sat/Sun  | 0 0 * * 0     |
+| @daily (or @midnight)  | Run once a day, midnight                   | 0 0 * * *     |
+| @hourly                | Run once an hour, beginning of hour        | 0 * * * *     |
 ```
 
 For example, "@weekly" causes a Workflow Execution to spawn once a week at midnight between Saturday and Sunday.
@@ -84,7 +85,7 @@ Intervals just take a string that can be accepted by [time.ParseDuration](http:/
 
 _This feature only applies in Temporal 1.15 and up_
 
-You can change the time zone that a Cron Schedule is interpreted in by prefixing the specification with `CRON_TZ=America/New_York ` (or your [desired time zone from tz](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)). `CRON_TZ=America/New_York 15 8 * * *` therefore spawns a Workflow Execution every day at 8:15 AM New York time, subject to caveats listed below.
+You can change the time zone that a Cron Schedule is interpreted in by prefixing the specification with `CRON_TZ=America/New_York` (or your [desired time zone from tz](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)). `CRON_TZ=America/New_York 15 8 * * *` therefore spawns a Workflow Execution every day at 8:15 AM New York time, subject to caveats listed below.
 
 Consider that using time zones in production introduces a surprising amount of complexity and failure modes!
 **If at all possible, we recommend specifying Cron Schedules in UTC (the default)**.

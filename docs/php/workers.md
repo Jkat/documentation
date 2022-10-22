@@ -4,6 +4,14 @@ title: Workers in PHP
 sidebar_label: Workers
 ---
 
+:::info Try the Developer's guide
+
+The majority of this information has moved into the [Developer's guide](/application-development/?lang=php).
+
+However, if you can't find what you are looking for there, we recommend checking this doc set as well.
+
+:::
+
 The [RoadRunner application server](https://roadrunner.dev/) will launch multiple Temporal PHP worker processes based on provided `.rr.yaml` configuration.
 
 Each worker might connect to one or multiple task queues. Worker poll _Temporal service_ for tasks, performs those tasks,
@@ -47,7 +55,7 @@ $factory->run();
 You can configure task queue name using first argument of `WorkerFactory`->`newWorker`:
 
 ```php
-$worker = $factory->newWorker('my-task-queue');
+$worker = $factory->newWorker('your-task-queue');
 ```
 
 As mentioned above you can create as many task queue connections inside a single worker as you need.
@@ -58,7 +66,7 @@ To configure additional worker options use `Temporal\Worker\WorkerOptions`:
 use Temporal\Worker\WorkerOptions;
 
 $worker = $factory->newWorker(
-    'my-task-queue',
+    'your-task-queue',
     WorkerOptions::new()
         ->withMaxConcurrentWorkflowTaskPollers(10)
 );

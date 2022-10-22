@@ -211,7 +211,7 @@ Set to enable logging in Workflow Execution replays.
 - type: `bool`
 - Default: `false`
 
-In Workflow Definitions you can use `workflow.GetLogger(ctx)` to write logs.
+In Workflow Definitions you can use [`workflow.GetLogger(ctx)`](https://pkg.go.dev/go.temporal.io/sdk/workflow#GetLogger) to write logs.
 By default, the logger will skip logging during replays, so you do not see duplicate logs.
 
 This is only really useful for debugging purpose.
@@ -250,7 +250,7 @@ If this Worker crashes, the sticky Workflow Task will timeout after `StickySched
 ```go
 // ...
 workerOptions := worker.Options{
-	DisableStickyExecution: false,
+	StickyScheduleToStartTimeout: time.Second(5),
   // ...
 }
 w := worker.New(c, "your_task_queue_name", workerOptions)
@@ -269,7 +269,7 @@ The resolution is in seconds.
 ```go
 // ...
 workerOptions := worker.Options{
-	DisableStickyExecution: false,
+	StickyScheduleToStartTimeout: time.Second(5),
   // ...
 }
 w := worker.New(c, "your_task_queue_name", workerOptions)
@@ -282,7 +282,7 @@ w := worker.New(c, "your_task_queue_name", workerOptions)
 
 This method of passing dependencies between Activity Task Executions is not recommended anymore.
 
-Instead, we recommend using a struct with fields that contain dependencies and [develop Activity Definitions](/go/how-to-develop-an-activity-definition-in-go) as struct methods and then pass all the dependencies on the structure initialization.
+Instead, we recommend using a struct with fields that contain dependencies and [develop Activity Definitions](/application-development/foundations#develop-activities) as struct methods and then pass all the dependencies on the structure initialization.
 
 :::
 

@@ -1,20 +1,18 @@
 ---
 title: TypeScript SDK introduction
 sidebar_label: Introduction
-description: The TypeScript SDK lets developers write highly scalable, reliable, annd long-running workflows without being a distributed systems expert.
+description: The TypeScript SDK lets developers write highly scalable, reliable, and long-running workflows without being a distributed systems expert.
 ---
 
-The Temporal TypeScript SDK ([now in Beta](/blog/typescript-beta)) lets you write highly scalable and reliable long-running Workflows without being a distributed systems expert.
+The Temporal TypeScript SDK lets you write highly scalable and reliable long-running Workflows without being a distributed systems expert.
 It is designed with TypeScript-first developer experience in mind, but works equally well with JavaScript.
 
-import { ResponsivePlayer } from '../../src/components'
-
-<ResponsivePlayer url='https://youtu.be/2HjnQlnA5eY' />
+[Introduction to Temporal](https://youtu.be/2HjnQlnA5eY)
 
 You can view:
 
 - [Code samples on GitHub](https://github.com/temporalio/samples-typescript)
-  - Fastest way to try these out is in the browser [![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-908a85?logo=gitpod)](https://gitpod.io/#https://github.com/temporalio/samples-typescript/) ([90 second demo](https://youtu.be/FdEQQC9EdfU))
+  - Fastest way to try these out is in the browser [![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-908a85?logo=gitpod)](https://gitpod.io/#https://github.com/temporalio/samples-typescript/) ([90-second demo](https://youtu.be/FdEQQC9EdfU))
 - [Searchable full API reference](https://typescript.temporal.io)
 - [SDK source on GitHub](https://github.com/temporalio/sdk-typescript) [![GitHub stars](https://img.shields.io/github/stars/temporalio/sdk-typescript)](https://github.com/temporalio/sdk-typescript/stargazers) (give us a star!)
 - [See version diffs on our Changelog](https://github.com/temporalio/sdk-typescript/blob/HEAD/CHANGELOG.md)
@@ -34,13 +32,13 @@ When you click on that link above and log in (there is a generous free tier), Gi
 
 - Pane 1: Temporal Cluster
   - Left: [Temporal Server](https://github.com/temporalio/docker-compose) - always running
-  - Right: [Temporal Web](/web-ui) and [Temporal `tctl` CLI](/tctl)
+  - Right: [Temporal Web](/web-ui) and [Temporal `tctl` CLI](/tctl-v1)
 - Pane 2: Hello World
   - Left: [Temporal Worker](https://github.com/temporalio/samples-typescript/blob/main/hello-world/src/worker.ts) - running and hot reloading
   - Right: [Temporal Client](https://github.com/temporalio/samples-typescript/blob/main/hello-world/src/client.ts) - run `npm run workflow`
 
 It takes ~3 minutes for the Docker Compose setup to start up.
-Once you have it up and running (Temporal Web should show the first Workflow Execution), you can use our [Hello World Walkthrough](/typescript/hello-world) tutorial to orient you to the sample file structure.
+Once you have it up and running (Temporal Web should show the first Workflow Execution), you can use our [Hello World Walkthrough](https://learn.temporal.io/getting_started/typescript/hello_world_in_typescript/) tutorial to orient you to the sample file structure.
 
 </details>
 
@@ -66,7 +64,7 @@ cd temporal
 docker-compose up
 ```
 
-If you want to run Temporal without Docker, DataDog has created an experimental project called [temporalite](https://github.com/DataDog/temporalite) you can try.
+If you want to run Temporal without Docker, [Temporalite](https://github.com/temporalio/temporalite) is a distribution of Temporal that runs as a single process with zero runtime dependencies.
 
 </details>
 
@@ -149,7 +147,7 @@ This "Hello, Temporal!" message comes from the combination of:
 <summary>Viewing your Workflow Execution in Temporal Web
 </summary>
 
-You can verify execution in Temporal Web (available at [`localhost:8080](http://localhost:8080/) on the default [`docker-compose`](https://github.com/temporalio/docker-compose)):
+You can verify execution in Temporal Web (available at [localhost:8080](http://localhost:8080/) on the default [`docker-compose`](https://github.com/temporalio/docker-compose)):
 
 ![image](https://user-images.githubusercontent.com/6764957/118865735-d7255f80-b913-11eb-8ace-a7dbdc351f8e.png)
 
@@ -157,7 +155,7 @@ You can verify execution in Temporal Web (available at [`localhost:8080](http://
 
 ## Next Steps
 
-For a full code walkthrough of our Hello World example, see our [Hello World documentation](/typescript/hello-world).
+For a full code walkthrough of our Hello World example, see our [Hello World documentation](https://learn.temporal.io/getting_started/typescript/hello_world_in_typescript/).
 
 If you want an example of what it's like to integrate Temporal into an existing full-stack app, check our [Next.js One-Click Buy Tutorial](/typescript/nextjs-tutorial).
 
@@ -185,9 +183,7 @@ For long form/FAQs, please search and ask on [the Temporal community forum](http
 
 ## TS SDK Intro Workshop
 
-We held a 2-hour introduction workshop explaining every core concept from scratch:
-
-<ResponsivePlayer url='https://www.youtube.com/watch?v=CeHSmv8oF_4&feature=youtu.be' />
+We held a 2-hour introduction workshop explaining every core concept from scratch: [Complete Intro to Temporal Workshop - TypeScript SDK](https://www.youtube.com/watch?v=cehsmv8of_4).
 
 Timestamps:
 

@@ -9,8 +9,8 @@ module.exports = {
   tagline: "Build invincible applications",
   url: "https://docs.temporal.io",
   baseUrl: "/",
-  onBrokenLinks: "warn",
-  onBrokenMarkdownLinks: "warn",
+  onBrokenLinks: "throw",
+  onBrokenMarkdownLinks: "throw",
   favicon: "img/favicon.png",
   organizationName: "temporalio", // Usually your GitHub org/user name.
   projectName: "temporal-documentation", // Usually your repo name.
@@ -55,57 +55,46 @@ module.exports = {
         autoCollapseCategories: true,
       },
     },
+    // announcementBar: {
+    //   id: "replay_announcement",
+    //   content:
+    //     'Content HERE',
+    //      backgroundColor: "#141414",
+    //      textColor: "#ffffff",
+    //      isCloseable: true,
+    //   },
     navbar: {
       hideOnScroll: false,
       logo: {
         alt: "Temporal logo",
         src: "img/temporal-logo-dark.svg",
         srcDark: "img/temporal-logo.svg",
+        href: "https://temporal.io",
       },
       items: [
         {
+          label: "Home",
           to: "/",
+          position: "left",
           activeBasePath: "none",
-          label: "Docs",
         },
         {
-          activeBasePath: "none",
-          label: "Case Studies",
-          items: [
-            {
-              to: "/blog/how-datadog-ensures-database-reliability-with-temporal",
-              label: "Datadog",
-            },
-            {
-              to: "/blog/how-temporal-simplified-checkr-workflows",
-              label: "Checkr",
-            },
-            {
-              to: "/blog/temporal-a-central-brain-for-box",
-              label: "Box",
-            },
-            {
-              to: "/blog/reliable-crypto-transactions-at-coinbase",
-              label: "Coinbase",
-            },
-            {
-              to: "/blog/descript-case-study",
-              label: "Descript",
-            },
-            {
-              to: "/blog/zebra-medical-case-study",
-              label: "Zebra",
-            },
-            {
-              to: "/blog/airbyte-case-study",
-              label: "Airbyte",
-            },
-          ],
+          label: "Temporal Cloud",
+          to: "/cloud",
+          activeBasePath: "cloud",
+          position: "left",
         },
         {
-          to: "/blog",
-          activeBasePath: "/blog",
-          label: "Blog",
+          label: "KB articles",
+          to: "/kb",
+          activeBasePath: "kb",
+          position: "left",
+        },
+        {
+          label: "Docs changelog",
+          to: "/changelog",
+          activeBasePath: "changelog",
+          position: "left",
         },
       ],
     },
@@ -131,12 +120,20 @@ module.exports = {
             },
             {
               label: "YouTube",
-              href: "https://www.youtube.com/channel/UCGovZyy8OfFPNlNV0i1fI1g",
+              href: "https://www.youtube.com/c/Temporalio",
+            },
+            {
+              label: "About the docs",
+              href: "https://github.com/temporalio/documentation/blob/master/README.md",
             },
           ],
         },
         {
           items: [
+            {
+              label: "Join the Cloud waitlist",
+              href: "https://pages.temporal.io/cloud-early-access",
+            },
             {
               label: "Meetups",
               href: "https://lu.ma/temporal",
@@ -146,7 +143,7 @@ module.exports = {
               href: "https://temporal.io/community#workshops",
             },
             {
-              label: "Support Forum",
+              label: "Support forum",
               href: "https://community.temporal.io/",
             },
           ],
@@ -154,16 +151,20 @@ module.exports = {
         {
           items: [
             {
-              label: "Use Cases",
-              href: "https://temporal.io/use-cases",
-            },
-            {
-              label: "Case Studies",
-              href: "https://docs.temporal.io/blog/tags/case-study/",
+              label: "Temporal education",
+              href: "https://learn.temporal.io",
             },
             {
               label: "Blog",
-              to: "/blog",
+              href: "https://temporal.io/blog",
+            },
+            {
+              label: "Use cases",
+              href: "https://temporal.io/use-cases",
+            },
+            {
+              label: "Newsletter signup",
+              href: "https://pages.temporal.io/newsletter-subscribe",
             },
           ],
         },
@@ -174,32 +175,16 @@ module.exports = {
               to: "/security",
             },
             {
-              label: "Privacy Policy",
+              label: "Privacy policy",
               to: "/privacy-policy",
             },
             {
-              label: "Terms of Service",
+              label: "Terms of service",
               href: "https://docs.temporal.io/pdf/temporal-tos-2021-07-24.pdf",
             },
-          ],
-        },
-        {
-          items: [
             {
-              label: "Join the Cloud Waitlist",
-              href: "https://pages.temporal.io/cloud-early-access",
-            },
-            {
-              label: "Subscribe to the Newsletter",
-              href: "https://temporal.us17.list-manage.com/subscribe/post?u=2334a0f23e55fd1840613755d&id=3475f910fc",
-            },
-            {
-              label: "We're Hiring",
+              label: "We're hiring",
               href: "https://temporal.io/careers",
-            },
-            {
-              label: "About the Docs",
-              href: "https://github.com/temporalio/documentation/blob/master/README.md",
             },
           ],
         },
@@ -221,7 +206,7 @@ module.exports = {
         docs: {
           sidebarPath: require.resolve("./sidebars.js"),
           routeBasePath: "/",
-          exclude: ["**/app-dev-context/**", "**/concept-context/**"], // do not render context content
+          exclude: [], // do not render context content
           editUrl: "https://github.com/temporalio/documentation/blob/master",
           /**
            * Whether to display the author who last updated the doc.
@@ -252,7 +237,7 @@ module.exports = {
                     if (!/^ts$/.test(node.lang)) {
                       return;
                     }
-                    node.value = "// @ts-nocheck\n" + node.value.trim();
+                    node.value = "// @ts-nocheck\n" + node.value;
                   }
 
                   visit(tree, "code", visitor);
@@ -287,6 +272,9 @@ module.exports = {
                     }
                     if (node.value.startsWith("// @ts-nocheck\n")) {
                       node.value = node.value.slice("// @ts-nocheck\n".length);
+                      if (node.lang === "ts") {
+                        node.value = dedent(node.value);
+                      }
                     }
                     // If TS compiled output is empty, replace it with a more helpful comment
                     if (
@@ -306,19 +294,7 @@ module.exports = {
         },
         // Will be passed to @docusaurus/plugin-content-blog
         // options: https://docusaurus.io/docs/api/plugins/@docusaurus/plugin-content-blog
-        blog: {
-          id: "blog",
-          routeBasePath: "blog",
-          path: "blog",
-          postsPerPage: 10,
-          editUrl: "https://github.com/temporalio/documentation/blob/master",
-          blogTitle: "Temporal Blog",
-          showReadingTime: true, // Show estimated reading time for the blog post.
-          feedOptions: {
-            type: "all",
-            copyright: `Copyright © ${new Date().getFullYear()} Temporal Technologies Inc.  All rights reserved. Copyright © 2020 Uber Technologies, Inc.`,
-          },
-        },
+        // blog: {},
         // Will be passed to @docusaurus/theme-classic.
         theme: {
           customCss: require.resolve("./src/css/custom.css"),
@@ -341,6 +317,11 @@ module.exports = {
   scripts: [
     {
       src: "/scripts/googletag.js",
+      async: true,
+      defer: true,
+    },
+    {
+      src: "/scripts/set-tab-language.js",
       async: true,
       defer: true,
     },
@@ -381,6 +362,60 @@ module.exports = {
         },
       },
     ],
+    [
+      "@docusaurus/plugin-content-blog",
+      {
+        /**
+         * Required for any multi-instance plugin
+         */
+        id: "changelog",
+        /**
+         * URL route for the blog section of your site.
+         * *DO NOT* include a trailing slash.
+         */
+        routeBasePath: "changelog",
+        /**
+         * Path to data on filesystem relative to site dir.
+         */
+        blogTitle: "Temporal documentation changelog",
+        blogSidebarTitle: "Docs changelog",
+        path: "changelog",
+        routeBasePath: "changelog",
+        blogDescription: "A log of changes to this site's content.",
+        showReadingTime: false, // Show estimated reading time for the blog post.
+        feedOptions: {
+          type: "all",
+          copyright: `Copyright © ${new Date().getFullYear()} Temporal Technologies Inc.  All rights reserved. Copyright © 2020 Uber Technologies, Inc.`,
+        },
+      },
+    ],
+    [
+      "@docusaurus/plugin-content-blog",
+      {
+        /**
+         * Required for any multi-instance plugin
+         */
+        id: "kb",
+        /**
+         * URL route for the blog section of your site.
+         * *DO NOT* include a trailing slash.
+         */
+        routeBasePath: "kb",
+        /**
+         * Path to data on filesystem relative to site dir.
+         */
+        path: "kb",
+        blogTitle: "Temporal Platform knowledge base",
+        blogSidebarTitle: "Recent KB articles",
+        blogDescription:
+          "User facing Temporal Platform knowledge base articles",
+        showReadingTime: false, // Show estimated reading time for the blog post.
+        feedOptions: {
+          type: "all",
+          copyright: `Copyright © ${new Date().getFullYear()} Temporal Technologies Inc.  All rights reserved. Copyright © 2020 Uber Technologies, Inc.`,
+        },
+      },
+    ],
   ],
 };
 
@@ -390,4 +425,41 @@ function convertIndent4ToIndent2(code) {
   return code.replace(/^( {4})+/gm, (match) => {
     return "  ".repeat(match.length / 4);
   });
+}
+
+// Remove the minimum leading whitespace on each line, excluding whitespace-only
+// lines. Helpful for cleaning up TypeScript examples that are pulled from
+// the body of a function.
+function dedent(code) {
+  const lines = code.split("\n");
+
+  if (!lines.length) {
+    return code;
+  }
+
+  // First, find the minimum number of leading space characters, excluding
+  // lines that are whitespace-only.
+  let minIndent = Number.POSITIVE_INFINITY;
+  for (const line of lines) {
+    if (line.trim().length === 0) {
+      continue;
+    }
+
+    const match = line.match(/^( +)/);
+    if (match && match[0].length < minIndent) {
+      minIndent = match[0].length;
+    } else if (!match) {
+      minIndent = 0;
+    }
+  }
+
+  // If there's no leading whitespace, just return the code
+  if (minIndent === 0 || minIndent === Number.POSITIVE_INFINITY) {
+    return code;
+  }
+
+  // Otherwise, remove leading spaces from each line
+  return lines
+    .map((line) => line.replace(new RegExp(`^ {${minIndent}}`), ""))
+    .join("\n");
 }

@@ -2,7 +2,7 @@
 id: visibility
 title: Visibility
 sidebar_label: Visibility
-description: This guide is meant to be a comprehensive overview of Temporal Visibility.
+description: This guide provides a comprehensive overview of Temporal Visibility.
 toc_max_heading_level: 4
 ---
 
@@ -11,7 +11,7 @@ toc_max_heading_level: 4
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-This guide is meant to be a comprehensive overview of Temporal Visibility.
+This guide provides a comprehensive overview of Temporal Visibility.
 
 The term Visibility, within the Temporal Platform, refers to the subsystems and APIs that enable an operator to view Workflow Executions that currently exist within a Cluster.
 
@@ -25,17 +25,17 @@ Closed Workflow Executions can be filtered by a time constraint and either a Wor
 
 ## Advanced Visibility
 
-Advanced Visibility, within the Temporal Platform, is the subsystem and APIs that enable the listing, filtering, and sorting of Workflow Executions through a custom SQL-like [List Filter](#list-filters).
+Advanced Visibility, within the Temporal Platform, is the subsystem and APIs that enable the listing, filtering, and sorting of Workflow Executions through a custom SQL-like [List Filter](#list-filter).
 
-To use Advanced Visibility, your Temporal Cluster must be [integrated with Elasticsearch](/next/cluster-deployment-guide#advanced-visibility).
+To use Advanced Visibility, your Temporal Cluster must be [integrated with Elasticsearch](/cluster-deployment-guide#elasticsearch).
 We highly recommend operating a Temporal Cluster with Elasticsearch for any use case that spawns more than just a few Workflow Executions.
 Elasticsearch takes on the Visibility request load, relieving potential performance issues.
 
-### List Filters
+## List Filter
 
 A List Filter is the SQL-like string that is provided as the parameter to an [Advanced Visibility](#advanced-visibility) List API.
 
-- [How to use a List Filter using tctl](/tctl/workflow/list/#--query)
+- [How to use a List Filter using tctl](/tctl-v1/workflow#list)
 
 The following is an example List Filter:
 
@@ -45,14 +45,14 @@ WorkflowType = "main.YourWorkflowDefinition" and ExecutionStatus != "Running" an
 
 [More example List Filters](#example-list-filters)
 
-A List Filter contains [Search Attribute](#search-attributes) names, Search Attribute values, and Operators.
+A List Filter contains [Search Attribute](#search-attribute) names, Search Attribute values, and Operators.
 
 - The following operators are supported in List Filters:
 
-  - **AND, OR, ()**
   - **=, !=, >, >=, <, <=**
-  - **IN**
+  - **AND, OR, ()**
   - **BETWEEN ... AND**
+  - **IN**
   - **ORDER BY**
 
 - A List Filter applies to a single Namespace.
@@ -116,14 +116,32 @@ order by StartTime desc, CloseTime asc
 order by CustomIntField asc
 ```
 
-### Search Attributes
+## Search Attribute
 
-A Search Attribute is an indexed field used in a [List Filter](#list-filters) to filter a list of Workflow Executions that have the Search Attribute in their metadata.
+A Search Attribute is an indexed field used in a [List Filter](#list-filter) to filter a list of [Workflow Executions](/workflows#workflow-execution) that have the Search Attribute in their metadata.
 
-If a Temporal Cluster does not have Elasticsearch integrated, but a Workflow Execution is spawned and tagged with Search Attributes, no errors occur.
-However, you won't be able to use Advanced Visibility List APIs and List Filters to find and list the Workflow Execution.
+If a [Temporal Cluster](/clusters#) does not have [Elasticsearch integrated](/cluster-deployment-guide#elasticsearch), but a Workflow Execution is spawned and tagged with Search Attributes, no errors occur.
+However, you won't be able to use [Advanced Visibility](#advanced-visibility) List APIs and List Filters to find and list the Workflow Execution.
 
-When using [Continue-As-New](/next/workflows#continue-as-new) or a [Temporal Cron Job](/next/workflows#cron-jobs), Search Attributes are carried over to the new Run by default.
+When using [Continue-As-New](/workflows#continue-as-new) or a [Temporal Cron Job](/workflows#temporal-cron-job), Search Attributes are carried over to the new Workflow Run by default.
+
+#### Search Attributes maximums
+
+Default total maximum number of Search Attribute **keys** per Temporal Cluster is 100.
+
+<!-- TODO - [How to configure maximum number of Search Attribute keys per Cluster](#) -->
+
+Default single Search Attribute **value** size limit is 2 KB.
+
+<!-- TODO - [How to configure Search Attribute value size limit](#) -->
+
+Total Search Attribute size: 40 KB
+
+<!-- TODO - [How to configure total Search Attribute size limite](#) -->
+
+<!-- temp keeping for reference
+This is configurable with [`SearchAttributesNumberOfKeysLimit`, `SearchAttributesTotalSizeLimit` and `SearchAttributesSizeOfValueLimit`](https://github.com/temporalio/temporal/blob/v1.7.0/service/history/configs/config.go#L440-L442), if you know what you are doing.
+-->
 
 #### Default Search Attributes
 
@@ -163,7 +181,7 @@ These Search Attributes are created when the initial index is created.
 
 #### Custom Search Attributes
 
-Custom Search Attributes can be [added to a Temporal Cluster only by using `tctl`](/tctl/how-to-add-a-custom-search-attribute-to-a-cluster-using-tctl).
+Custom Search Attributes can be [added to a Temporal Cluster by using `tctl search-attribute create`.
 Adding a Search Attribute makes it available to use with Workflow Executions within that Cluster.
 
 There is no hard limit on the number of attributes you can add.
@@ -183,23 +201,23 @@ It is not possible to rename Search Attributes or remove them from the index sch
 The [temporalio/auto-setup](https://hub.docker.com/r/temporalio/auto-setup) Docker image uses a pre-defined set of custom Search Attributes that are handy for testing.
 Their names indicate their types:
 
-- CustomTextField
-- CustomKeywordField
-- CustomIntField
-- CustomDoubleField
 - CustomBoolField
 - CustomDatetimeField
+- CustomDoubleField
+- CustomIntField
+- CustomKeywordField
+- CustomTextField
 
 #### Types
 
 Search Attributes must be one of the following types:
 
-- Text
-- Keyword
-- Int
-- Double
 - Bool
 - Datetime
+- Double
+- Int
+- Keyword
+- Text
 
 Note:
 
@@ -214,11 +232,11 @@ Note:
   - As a **Text** it would be matched by `ProductId = 2dd8`, which could cause unwanted matches.
 - The **Text** type cannot be used in the "Order By" clause.
 
-- [How to view Search Attributes using tctl](/tctl/cluster/list-search-attributes)
+- [How to view Search Attributes using tctl](/tctl-v1/cluster#get-search-attributes)
 
 #### Search Attributes as Workflow Execution metadata
 
-To actually have results from the use of a [List Filter](#list-filters), Search Attributes must be added to a Workflow Execution as metadata.
+To actually have results from the use of a [List Filter](#list-filter), Search Attributes must be added to a Workflow Execution as metadata.
 How to do this entirely depends on the method by which you spawn the Workflow Execution:
 
 - [How to set Search Attributes as Workflow Execution metadata in Go](/go/startworkflowoptions-reference/#searchattributes)

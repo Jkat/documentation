@@ -60,8 +60,10 @@ When you call `proxyActivities` in a Workflow function, there are [a range of Ac
 ```ts
 // Sample of typical options you can set while creating a proxy for the `greet` Activity
 const { greet } = proxyActivities<typeof activities>({
-  startToCloseTimeout: '30s', // recommended
-  scheduleToCloseTimeout: '5m', // useful
+  // recommended
+  startToCloseTimeout: '30s',
+  // useful
+  scheduleToCloseTimeout: '5m',
   // The below is a Retry Policy. It is used to retry the Activity if it fails.
   retry: {
     // These are the values of the Default Retry Policy
@@ -79,7 +81,7 @@ We explain the Timeouts and Retries below. You can also specify `namespace`, `ta
 ### Activity Timeouts
 
 Timeouts and Retries are the most immediate benefit of moving code onto Temporal.
-There are [four Activity Timeouts](/blog/activity-timeouts) you can set.
+There are [four Activity Timeouts](https://temporal.io/blog/activity-timeouts) you can set.
 When a Timeout happens, your activity will be retried according to your [`RetryPolicy`](/concepts/what-is-a-retry-policy/).
 
 - `startToCloseTimeout`: Maximum time of a single Activity execution attempt. **We recommend always setting this**. [More info](/concepts/what-is-a-start-to-close-timeout/)
@@ -97,15 +99,18 @@ const { greet } = proxyActivities<typeof activities>({
 
 // Example 2
 const { longRunningActivity } = proxyActivities<typeof activities>({
-  scheduleToCloseTimeout: '5m', // translates to 300000 ms
-  startToCloseTimeout: '30s', // translates to 30000 ms
-  heartbeatTimeout: 10000, // equivalent to '10 seconds'
+  // translates to 300000 ms
+  scheduleToCloseTimeout: '5m',
+  // translates to 30000 ms
+  startToCloseTimeout: '30s',
+  // equivalent to '10 seconds'
+  heartbeatTimeout: 10000,
 });
 ```
 
 ### Activity Retry Policy
 
-You can set a `retry` policy with [RetryPolicy](https://typescript.temporal.io/api/interfaces/client.retrypolicy/) that define how activity is retried in case of failure.
+You can set a `retry` policy with [RetryPolicy](https://typescript.temporal.io/api/interfaces/client.RetryPolicy/) that define how activity is retried in case of failure.
 
 ```ts
 // Example 1 - default
@@ -142,13 +147,13 @@ const { greet } = proxyActivities<typeof activities>({
 });
 ```
 
-For a proper guide to each Retry Option, see the [RetryPolicy API Reference](https://typescript.temporal.io/api/interfaces/client.retrypolicy/).
+For a proper guide to each Retry Option, see the [RetryPolicy API Reference](https://typescript.temporal.io/api/interfaces/client.RetryPolicy/).
 
 As you customize your Workflow errors to be more descriptive, advanced users will want to become familiar with [Temporal's Failure classes](/typescript/handling-failure).
 
 ## How to register an Activity on a Worker
 
-All activities must be registered by a Worker, or you will get an error that looks like `"Activity function myActivity is not registered on this Worker"` when you try to invoke it from a Workflow.
+All activities must be registered by a Worker, or you will get an error that looks like `"Activity function yourActivity is not registered on this Worker"` when you try to invoke it from a Workflow.
 
 ```ts
 import { Worker } from '@temporalio/worker';
@@ -218,8 +223,8 @@ You may proxy multiple Activities from the same `proxyActivities` call if you wa
 ```ts
 export async function Workflow(name: string): Promise<string> {
   // destructuring multiple activities with the same options
-  const { act1, act2, act3 } =
-    proxyActivities<typeof activities>(/* activityOptions */);
+  const { act1, act2, act3 } = proxyActivities<typeof activities>();
+  /* activityOptions */
   await act1();
   await Promise.all([act2, act3]);
 }
@@ -250,7 +255,7 @@ ApplicationFailure: Activity function actC is not registered on this Worker, ava
 
 ## Activity Context utilities
 
-Temporal SDK also exports a [`Context`](https://typescript.temporal.io/api/classes/activity.context/) class with useful features for activities: `import { Context } from '@temporalio/activity'`
+Temporal SDK also exports a [`Context`](https://typescript.temporal.io/api/classes/activity.Context/) class with useful features for activities: `import { Context } from '@temporalio/activity'`
 
 | Activity Context properties            | Description                                                                                                                                                                                    |
 | -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -330,15 +335,15 @@ Activity Cancellation is an optional capability that lets you do graceful cleanu
 
 There are 3 ways to handle Activity cancellation:
 
-1. Await on [`Context.current().cancelled`](https://typescript.temporal.io/api/classes/activity.context#cancelled)
+1. Await on [`Context.current().cancelled`](https://typescript.temporal.io/api/classes/activity.Context#cancelled)
 2. Catch a [`CancelledFailure`](/typescript/handling-failure/) while awaiting "cancellation-aware" APIs like `Context.current().sleep`. Errors can be validated with the `isCancellation(err)` utility function (see example below)
-3. Pass the context's abort Signal at [`Context.current().cancellationSignal`](https://typescript.temporal.io/api/classes/activity.context#cancelled) to a library that supports it like `fetch`
+3. Pass the context's abort Signal at [`Context.current().cancellationSignal`](https://typescript.temporal.io/api/classes/activity.Context#cancelled) to a library that supports it like `fetch`
 
-[`heartbeat()`](https://typescript.temporal.io/api/classes/activity.context/#heartbeat) in the TypeScript SDK is a background operation and does not propagate errors to the caller, such as when the scheduling Workflow has already completed or the Activity has been closed by the Server (due to timeout for instance). These errors are translated into cancellation and can be handled using the methods above.
+[`heartbeat()`](https://typescript.temporal.io/api/classes/activity.Context/#heartbeat) in the TypeScript SDK is a background operation and does not propagate errors to the caller, such as when the scheduling Workflow has already completed or the Activity has been closed by the Server (due to timeout for instance). These errors are translated into cancellation and can be handled using the methods above.
 
 #### Example: Activity that fakes progress and can be cancelled
 
-The [`sleep`](https://typescript.temporal.io/api/classes/activity.context#sleep) method exposed in `Context.current()` is comparable to a standard `sleep` function: `new Promise(resolve => setTimeout(resolve, sleepMS));` except that it also rejects if the Activity is cancelled.
+The [`sleep`](https://typescript.temporal.io/api/classes/activity.Context#sleep) method exposed in `Context.current()` is comparable to a standard `sleep` function: `new Promise(resolve => setTimeout(resolve, sleepMS));` except that it also rejects if the Activity is cancelled.
 
 <!--SNIPSTART typescript-activity-fake-progress-->
 <!--SNIPEND-->
@@ -389,7 +394,7 @@ const { getEnvVar } = workflow.proxyLocalActivities({
   startToCloseTimeout: '2 seconds',
 });
 
-export async function myWorkflow(): Promise<void> {
+export async function yourWorkflow(): Promise<void> {
   const someSetting = await getEnvVar('SOME_SETTING');
   // ...
 }

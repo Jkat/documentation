@@ -4,13 +4,14 @@ title: What is a Heartbeat Timeout?
 sidebar_label: Heartbeat Timeout
 description: A Heartbeat Timeout is the maximum time between Activity Heartbeats.
 tags:
+  - term
   - explanation
   - timeouts
 ---
 
 A Heartbeat Timeout is the maximum time between [Activity Heartbeats](/concepts/what-is-an-activity-heartbeat).
 
-- [How to set a Heartbeat Timeout](/application-development-guide/#heartbeat-timeout)
+- [How to set a Heartbeat Timeout](/application-development/features#heartbeat-timeout)
 
 ![Heartbeat Timeout periods](/diagrams/heartbeat-timeout.svg)
 
